@@ -11,7 +11,7 @@ class AirogsDataModule(pl.LightningDataModule):
         self.train_batch_size = train_batch_size
         self.test_batch_size = test_batch_size
         self.num_workers = num_workers
-        self.
+        
 
     def setup(self, stage: [str] = None) -> None:
         """Setup the data module.
@@ -19,7 +19,7 @@ class AirogsDataModule(pl.LightningDataModule):
         Args:
             stage (Optional[str], optional): Stage of the data module setup. Defaults to None.
         """
-        if stage == "fit" or stage is None:
+        if stage == "fit" :
             self.train_dataset = AirogsDataset(task="classification", transform=self.train_transform)
             self.val_dataset = AirogsDataset(task="classification", transform=self.val_transform)
         if stage == "test" or stage is None:
