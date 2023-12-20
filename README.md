@@ -1,1 +1,0 @@
-# airogs_basemodel
