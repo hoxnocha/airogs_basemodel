@@ -1,16 +1,27 @@
 from pandas import DataFrame
-import lightning.pytorch as pl
+import pytorch_lightning as pl
 from airogs_basemodel.data.dataset import AirogsDataset
 from pytorch_lightning.utilities.types import EVAL_DATALOADERS, TRAIN_DATALOADERS
-from torch.utils.data.dataloader import DataLoader, default_collate
-
+from torch.utils.data.dataloader import DataLoader
+from pathlib import Path
+import torch
 
 class AirogsDataModule(pl.LightningDataModule):
-    def __init__(self, train_batch_size: int, test_batch_size: int, num_workers: int):
+    def __init__(self, 
+                 image_folder_path: str,
+                 csv_file_path: str,
+                 train_batch_size: int,
+                 test_batch_size: int, 
+                 num_workers: int,
+                 pin_memory: bool = True):
         super().__init__()
+        self.image_folder_path = image_folder_path
+        self.csv_file_path = csv_file_path
         self.train_batch_size = train_batch_size
         self.test_batch_size = test_batch_size
         self.num_workers = num_workers
+        self.pin_memory = pin_memory
+
         
 
     def setup(self, stage: [str] = None) -> None:
@@ -19,11 +30,13 @@ class AirogsDataModule(pl.LightningDataModule):
         Args:
             stage (Optional[str], optional): Stage of the data module setup. Defaults to None.
         """
-        if stage == "fit" :
-            self.train_dataset = AirogsDataset(task="classification", transform=self.train_transform)
-            self.val_dataset = AirogsDataset(task="classification", transform=self.val_transform)
+        if stage == "fit" or stage is None:
+            airogs_full = AirogsDataset(task="classification", image_folder_path=self.image_folder_path, csv_file_path=self.csv_file_path)
+            train_size = int(0.8 * len(airogs_full))
+            val_size = len(airogs_full) - train_size
+            self.train_dataset, self.val_dataset = torch.utils.data.random_split(airogs_full, [train_size, val_size])
         if stage == "test" or stage is None:
-            self.test_dataset = AirogsDataset(task="classification", transform=self.test_transform)
+            self.test_dataset = AirogsDataset(task="classification", image_folder_path=self.image_folder_path, csv_file_path=self.csv_file_path)
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         """Get the train dataloader.

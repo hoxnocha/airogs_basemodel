@@ -1,6 +1,6 @@
-from .datamodule import AirogsDataModule
-from .dataset import AirogsDataset
-from .airogs_label import LABEL_DICT
+from airogs_basemodel.data.datamodule import AirogsDataModule
+from airogs_basemodel.data.dataset import AirogsDataset
+from airogs_basemodel.data.airogs_label import LABEL_DICT
 
 __all__ = ["AirogsDataset", 
            "AirogsDataModule",

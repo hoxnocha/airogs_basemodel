@@ -1,21 +1,25 @@
 from typing import Any, Dict, List, Optional
 import torch
-from lightning.pytorch import LightningModule
+from pytorch_lightning import LightningModule
 from torchmetrics import MeanMetric, AUROC
 from torchmetrics.functional import f1_score 
-from trochvsion.models import EfficientNet
+from torchvision.models import efficientnet_b4, EfficientNet_B4_Weights
+from torchvision.models._api import WeightsEnum
+from torch.hub import load_state_dict_from_url
 
 
 
 class EfficientNetModule(LightningModule):
     def __init__(
             self, 
-            model_name: str = 'efficientnet-b4',
+            
     ):
         super().__init__()
         self.save_hyperparameters()
-        self.model_name = model_name
-        self.model = EfficientNet.from_name(model_name)
+        
+      
+
+        self.model = efficientnet_b4(pretrained=True)
         self.train_acc = MeanMetric()
         self.val_acc = MeanMetric()
         self.test_acc = MeanMetric()

@@ -24,8 +24,11 @@ class AirogsDataset(Dataset):
         files = glob.glob1(self.image_folder_path, '*.jpg')
         files = [os.path.basename(file)[:-4] for file in files]
         self.df = self.df[self.df['challenge_id'].isin(files)]
+        label_mapping = {"NRG": 0, "RG":1 }
+        self.df['class'] = self.df['class'].map(label_mapping)
         self.transform =  T.Compose([
-            T.resize((512,512)),
+            T.ToPILImage(),
+            T.Resize((512,512)),
             T.ToTensor(),
             
             ])
@@ -40,16 +43,19 @@ class AirogsDataset(Dataset):
     def __getitem__(self, index: int) -> tuple[Any, Any]:
 
         #get image path
-        image_path = Path(self.image_folder_path) / self.df.iloc[index]['challenge_id'] + '.jpg'
+        image_path = f"{self.image_folder_path}" + "/" + self.df.iloc[index]['challenge_id'] + '.jpg'
+        #image_path = Path(image_path)
         
         image = cv2.imread(str(image_path))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         h, s, v = cv2.split(image)
         v_equlized = cv2.equalizeHist(v)
+        #import ipdb; ipdb.set_trace()
         image = cv2.merge((h, s, v_equlized))
+        image = self.transform(image)
         label = self.df.iloc[index]['class']
 
-        return image, LABEL_DICT[label]
+        return image, label
     
     
         
